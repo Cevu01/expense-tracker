@@ -1,11 +1,29 @@
 import { useState } from "react";
-
+const initialExpenses = {
+  food: [],
+  transport: [],
+  sport: [],
+  gifts: [],
+  shopping: [],
+};
 export default function App() {
+  const [expenses, setExpenses] = useState(initialExpenses);
   const [sallery, setSallery] = useState("");
   const [category, setCategory] = useState("food");
   const [product, setProduct] = useState("");
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
+
+  function handleAddNewExpense(expense) {
+    setExpenses((prevExpenses) => ({
+      ...prevExpenses,
+      [expense.category]: [...prevExpenses[expense.category], expense],
+    }));
+    // Clear the inputs after submission
+    setProduct("");
+    setQuantity("");
+    setPrice("");
+  }
 
   return (
     <div className="app">
@@ -19,8 +37,9 @@ export default function App() {
         setQuantity={setQuantity}
         price={price}
         setPrice={setPrice}
+        onAddNewExpense={handleAddNewExpense}
       />
-      <Category />
+      <Category expenses={expenses} />
       <Total />
     </div>
   );
@@ -55,11 +74,25 @@ function Inputs({
   setQuantity,
   price,
   setPrice,
+  onAddNewExpense,
 }) {
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    const id = crypto.randomUUID();
+    const newExpense = {
+      id,
+      category,
+      product,
+      quantity,
+      price,
+    };
+    onAddNewExpense(newExpense);
+  }
   return (
-    <div className="inputs">
+    <form className="inputs" onSubmit={handleSubmit}>
       <label>Category:</label>
-      <select value={category} onChange={setCategory}>
+      <select value={category} onChange={(e) => setCategory(e.target.value)}>
         <option value="food">Food</option>
         <option value="transport">Transport</option>
         <option value="sport">Sport</option>
@@ -89,33 +122,35 @@ function Inputs({
       />
 
       <button className="button">Submit</button>
-    </div>
+    </form>
   );
 }
 
-function Category() {
+function Category({ expenses }) {
   return (
     <div>
-      <ul className="categories">
-        <Item />
-        <Item />
-        <Item />
-        <Item />
-        <Item />
-      </ul>
+      {Object.keys(expenses).map((cat) => (
+        <div key={cat}>
+          <h2>{cat.charAt(0).toUpperCase() + cat.slice(1)}</h2>
+          <ul className="categories">
+            {expenses[cat].map((expense) => (
+              <Item expense={expense} key={expense.id} />
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
   );
 }
 
-function Item() {
+function Item({ expense }) {
   return (
     <li className="category-container">
-      <h2>Food</h2>
       <div className="item">
         <div>
-          <span>2</span>
-          <span>Burger</span>
-          <span>$20</span>
+          <span>{expense.quantity}</span>
+          <span>{expense.product}</span>
+          <span>${expense.price}</span>
         </div>
 
         <div className="item-actions">

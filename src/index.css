@@ -124,7 +124,9 @@ button:hover {
 }
 .categories {
   display: flex;
-  gap: 4rem;
+  flex-wrap: wrap; /* Allows items to wrap if there's not enough space */
+  gap: 4rem; /* Space between categories */
+  justify-content: center; /* Center the items */
 }
 
 .category-container {
@@ -136,7 +138,7 @@ button:hover {
   width: 25rem;
 }
 
-.category-container h2 {
+h2 {
   font-size: 2rem;
   border-bottom: 2px solid #fff;
 }
