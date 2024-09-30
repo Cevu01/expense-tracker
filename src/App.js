@@ -25,6 +25,25 @@ export default function App() {
     setPrice("");
   }
 
+  function handleDelete(id, category) {
+    setExpenses((prevExpenses) => ({
+      ...prevExpenses,
+      [category]: prevExpenses[category]?.filter(
+        (expense) => expense.id !== id
+      ),
+    }));
+  }
+
+  const totalSummary = Object.keys(expenses)?.reduce((total, key) => {
+    const categoryExpenses = expenses[key];
+    const categoryTotal = categoryExpenses?.reduce((catTotal, expense) => {
+      return catTotal + Number(expense.price); // Ensure the price is a number
+    }, 0);
+    return total + categoryTotal;
+  }, 0);
+
+  const remainingSallery = sallery ? sallery - totalSummary : 0;
+
   return (
     <div className="app">
       <Header sallery={sallery} setSallery={setSallery} />
@@ -39,8 +58,8 @@ export default function App() {
         setPrice={setPrice}
         onAddNewExpense={handleAddNewExpense}
       />
-      <Category expenses={expenses} />
-      <Total />
+      <Category expenses={expenses} onDelete={handleDelete} />
+      <Total totalSummary={totalSummary} remainingSallery={remainingSallery} />
     </div>
   );
 }
@@ -126,15 +145,15 @@ function Inputs({
   );
 }
 
-function Category({ expenses }) {
+function Category({ expenses, onDelete }) {
   return (
     <div>
       {Object.keys(expenses).map((cat) => (
-        <div key={cat}>
+        <div className="div" key={cat}>
           <h2>{cat.charAt(0).toUpperCase() + cat.slice(1)}</h2>
           <ul className="categories">
-            {expenses[cat].map((expense) => (
-              <Item expense={expense} key={expense.id} />
+            {expenses[cat]?.map((expense) => (
+              <Item expense={expense} key={expense.id} onDelete={onDelete} />
             ))}
           </ul>
         </div>
@@ -143,7 +162,7 @@ function Category({ expenses }) {
   );
 }
 
-function Item({ expense }) {
+function Item({ expense, onDelete }) {
   return (
     <li className="category-container">
       <div className="item">
@@ -154,20 +173,23 @@ function Item({ expense }) {
         </div>
 
         <div className="item-actions">
-          <button className="edit">Edit</button>
-          <button className="delete">Delete</button>
+          <button
+            className="delete"
+            onClick={() => onDelete(expense.id, expense.category)}
+          >
+            Delete
+          </button>
         </div>
       </div>
-      <p>Summary: $60</p>
     </li>
   );
 }
 
-function Total() {
+function Total({ totalSummary, remainingSallery }) {
   return (
     <div className="total">
-      <p>TOTAL: $160</p>
-      <p>Remaining sallery: $840</p>
+      <p>TOTAL: ${totalSummary}</p>
+      <p>Remaining sallery: ${remainingSallery}</p>
     </div>
   );
 }
